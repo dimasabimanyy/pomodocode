@@ -1,15 +1,17 @@
 const vscode = require('vscode');
 const { startTimer, resetTimer, toggleSession, getFormattedTime, setSessionDuration } = require('./src/timer'); 
+const path = require('path');
+const player = require('play-sound')();
 
 let isWorking = true;
-let sessionDuration = 30 * 1000;  // Set to 30 seconds for testing
+let sessionDuration = 2 * 1000;  // Set to 30 seconds for testing
 let currentTime = sessionDuration;  // Make sure currentTime starts with sessionDuration
 let timerStatusBarItem;
 let progressStatusBarItem;
 let progressBarInterval;
 
 function activate(context) {
-  let startCommand = vscode.commands.registerCommand('extension.startPomodoro', () => {
+	let startCommand = vscode.commands.registerCommand('extension.startPomodoro', () => {
     vscode.window.showInformationMessage('Starting Pomodoro session...');
     setSessionDuration(sessionDuration);  // Set the session duration here for testing
     startPomodoroSession();
@@ -97,10 +99,20 @@ function startPomodoroSession() {
 }
 
 function playBellSound() {
-  // You can change this to any system bell or audio file you like
-  const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');  // Use a beep sound as example
-  audio.play();
+	console.log("Dir name: ", __dirname);
+  const audioPath = path.join(__dirname, 'assets', 'level-up.mp3');  // Set the path to your audio file
+
+	console.log({audioPath})
+  
+  player.play(audioPath, function(err) {
+		if (err) {
+      console.log('Error playing sound:', err);
+    } else {
+      console.log('Sound played successfully');
+    }
+  });
 }
+
 
 function deactivate() {
   resetTimer();
