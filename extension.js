@@ -1,8 +1,9 @@
 const vscode = require('vscode');
-const { startTimer, resetTimer, toggleSession, getFormattedTime } = require('./src/timer'); 
+const { startTimer, resetTimer, toggleSession, getFormattedTime, setSessionDuration } = require('./src/timer'); 
 
-let isWorking = true; 
-let currentTime = 30 * 1000;  // Start with a 30-second session (for testing)
+let isWorking = true;
+let sessionDuration = 30 * 1000;  // Set to 30 seconds for testing
+let currentTime = sessionDuration;  // Make sure currentTime starts with sessionDuration
 let timerStatusBarItem;
 let progressStatusBarItem;
 let progressBarInterval;
@@ -10,12 +11,13 @@ let progressBarInterval;
 function activate(context) {
   let startCommand = vscode.commands.registerCommand('extension.startPomodoro', () => {
     vscode.window.showInformationMessage('Starting Pomodoro session...');
+    setSessionDuration(sessionDuration);  // Set the session duration here for testing
     startPomodoroSession();
   });
 
   let resetCommand = vscode.commands.registerCommand('extension.resetPomodoro', () => {
     resetTimer();
-    currentTime = 30 * 1000;  
+    setSessionDuration(sessionDuration);  // Reset to sessionDuration on reset
     if (timerStatusBarItem) {
       timerStatusBarItem.text = `$(clock) Pomodoro: ${getFormattedTime(currentTime)}`;
       progressStatusBarItem.text = 'Progress: 0%';
@@ -53,19 +55,26 @@ function startPomodoroSession() {
       timerStatusBarItem.text = `$(clock) Pomodoro: 00:00`;
       progressStatusBarItem.text = 'Progress: 100%';  // Full progress
     }
+
+    // Show notification and play bell sound when timer ends
+    vscode.window.showInformationMessage('Pomodoro session completed!');
+    playBellSound();
+
     toggleSession();  
-    currentTime = 5 * 60 * 1000;  // For break time
+    setSessionDuration(5 * 60 * 1000);  // For break time (5 minutes)
     startTimer(() => {
       if (timerStatusBarItem) {
         timerStatusBarItem.text = `$(clock) Pomodoro: 00:00`;
         progressStatusBarItem.text = 'Progress: 100%';  // Full progress
       }
+      vscode.window.showInformationMessage('Break time is over!');
+      playBellSound();
       toggleSession();  
-      currentTime = 30 * 1000;  // Work session
+      setSessionDuration(sessionDuration);  // Work session, reset to sessionDuration for the next work period
       startPomodoroSession();  // Start a new session after break
     });
   });
-  
+
   // Update timer and progress as percentage
   let progress = 0;
   progressBarInterval = setInterval(() => {
@@ -74,7 +83,7 @@ function startPomodoroSession() {
       progressStatusBarItem.text = 'Progress: 100%';  // Ensure progress shows 100% at the end
       return;
     }
-    progress = ((30 * 1000 - currentTime) / (30 * 1000)) * 100;  // Calculate progress in percentage
+    progress = ((sessionDuration - currentTime) / sessionDuration) * 100;  // Calculate progress in percentage
 
     // Ensure that the progress doesn't exceed 100%
     if (progress >= 100) {
@@ -85,6 +94,12 @@ function startPomodoroSession() {
     timerStatusBarItem.text = `$(clock) Pomodoro: ${getFormattedTime(currentTime)}`;
     currentTime -= 1000;
   }, 1000);
+}
+
+function playBellSound() {
+  // You can change this to any system bell or audio file you like
+  const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');  // Use a beep sound as example
+  audio.play();
 }
 
 function deactivate() {
