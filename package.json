@@ -1,0 +1,42 @@
+{
+  "name": "pomodoro-timer",
+  "displayName": "pomodoro-timer",
+  "description": "A VS code extension for pomodoro and task",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:extension.startPomodoro",
+    "onCommand:extension.resetPomodoro"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.startPomodoro",
+        "title": "Start Pomodoro Timer"
+      },
+      {
+        "command": "extension.resetPomodoro",
+        "title": "Reset Pomodoro Timer"
+      }
+    ]
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.96.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "eslint": "^9.16.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
